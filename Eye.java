@@ -133,6 +133,15 @@ public class Eye extends AdvancedRobot
        // }
     }
 
+    public void onWin(WinEvent event) {
+        for(int i = 0; i <= 36; i++) {
+            setTurnRight(30);
+            setAhead(2);
+            setFire(0.1);
+            execute();
+        }
+    }
+
     public void checkFire(double firePower) {
         if(getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) <= gunTurnError) setFire(firePower);
     }
