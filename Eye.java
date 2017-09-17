@@ -15,14 +15,14 @@ public class Eye extends AdvancedRobot
 	
         
         String target = "";
-	private int gunTurnError = 5;
+        private int gunTurnError = 5;
         private int maxBulletMiss = 7;
 
 	/**
 	 * dodgeBullet: Dodge a bullet when it's fired at you.
 	 */
-        int sideToggle = 1;
-	public void dodgeBullet(AdvancedEnemyBot event) {
+    int sideToggle = 1;
+    public void dodgeBullet(AdvancedEnemyBot event) {
 		// use 'event' object for onScannedRobotEvent and dodge the bullet.
 	        setTurnRight(event.getBearing() - 90 + (10 * sideToggle));
                 setAhead(50 * sideToggle);
@@ -60,7 +60,7 @@ public class Eye extends AdvancedRobot
                             turnTo = (turnTo > 180) ? -1 * (360 - turnTo) : turnTo;
 		            setTurnGunRight(turnTo);
                         }
-                        else if (usePredict) {
+                        else {
                             predictTurnGun(calcTime(enemy));
                         }
 		        checkFire(3.0);
