@@ -2,11 +2,18 @@ package ms;
 import robocode.*;
 import java.awt.Color;
 import java.awt.geom.Point2D;
+import java.io.*;
+import java.text.NumberFormat;
 
 // API help : http://robocode.sourceforge.net/docs/robocode/robocode/Robot.html
 
 public class Main extends AdvancedRobot
 {
+    private PrintStream ps;
+    private NumberFormat f;
+    File outputFile = getDataFile("./Output/output.dat");
+    RobocodeFileOutputStream roboOut = outputFile;
+
     private AdvancedEnemyBot enemy = new AdvancedEnemyBot();
     private int gunTurnError = 5;
     private byte scanFlip = 1;
@@ -14,28 +21,27 @@ public class Main extends AdvancedRobot
 		// Initialization of the robot should be put here
 
 		// After trying out your robot, try uncommenting the import at the top,
-		// and the next line:
+    	// and the next line:
 
 		setColors(Color.red,Color.blue,Color.green); // body,gun,radar
-                setAdjustRadarForRobotTurn(true);
-                enemy.reset();
+        setAdjustRadarForRobotTurn(true);
+        enemy.reset();
+        f = NumberFormat.getNumberInstance();
+        f.setMaximumFractionDigits(2);
 		while(true) {
-                        if (enemy.getName() == "") {
-                                setTurnRadarRight(360);
-                        }
-                        else {
-                                double radarTurn = getHeading() - getRadarHeading() + enemy.getBearing();
-                                radarTurn += 25 * scanFlip;
-                                setTurnRadarRight(radarTurn);
-                                scanFlip *= -1;
-
-                        
-		                        //setTurnGunRight(normalizeBearing(enemy.getBearing() + getHeading() - getGunHeading()));
-                                predictTurnGun(calcTime(enemy));
-		                        checkFire(Math.min(400 / ((enemy.getDistance() != 0.0) ? enemy.getDistance() : 400), 3));
-                        }
-                        execute();
-                }
+            if (enemy.getName() == "") {
+                setTurnRadarRight(360);
+            } else {
+                double radarTurn = getHeading() - getRadarHeading() + enemy.getBearing();
+                radarTurn += 25 * scanFlip;
+                setTurnRadarRight(radarTurn);
+                scanFlip *= -1;
+                //setTurnGunRight(normalizeBearing(enemy.getBearing() + getHeading() - getGunHeading()));
+                predictTurnGun(calcTime(enemy));
+                checkFire(Math.min(400 / ((enemy.getDistance() != 0.0) ? enemy.getDistance() : 400), 3));
+            }
+            execute();
+        }
 	}
 
 	/**
