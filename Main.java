@@ -11,24 +11,22 @@ public class Main extends AdvancedRobot
 {
     private PrintStream ps;
     private NumberFormat f;
-    File outputFile = getDataFile("./Output/output.dat");
-    RobocodeFileOutputStream roboOut = outputFile;
-
     private AdvancedEnemyBot enemy = new AdvancedEnemyBot();
     private int gunTurnError = 5;
     private byte scanFlip = 1;
 	public void run() {
-		// Initialization of the robot should be put here
-
-		// After trying out your robot, try uncommenting the import at the top,
-    	// and the next line:
-
 		setColors(Color.red,Color.blue,Color.green); // body,gun,radar
         setAdjustRadarForRobotTurn(true);
         enemy.reset();
         f = NumberFormat.getNumberInstance();
         f.setMaximumFractionDigits(2);
-		while(true) {
+        try {
+            File outputFile = getDataFile("output.dat");
+            ps = new PrintStream(new RobocodeFileOutputStream(outputFile));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        while(true) {
             if (enemy.getName() == "") {
                 setTurnRadarRight(360);
             } else {
@@ -54,9 +52,14 @@ public class Main extends AdvancedRobot
 	}
 
     public void onRobotDeath(RobotDeathEvent event) { 
-                if (event.getName().equals(enemy.getName())) {
-                    enemy.reset();
-                }
+        if (event.getName().equals(enemy.getName())) {
+            enemy.reset();
+        }
+        if(ps != null) ps.close();
+    }
+
+    public void onWin(WinEvent event) {
+        if(ps != null) ps.close();
     }
 
 	/**
@@ -74,7 +77,11 @@ public class Main extends AdvancedRobot
 		// Replace the next line with any behavior you would like
 		back(20);
 	}
-        
+    
+    //////////////////////////
+    //  Utility Functions   //
+    //////////////////////////
+
     public void checkFire(double firePower) {
         if(getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) <= gunTurnError) setFire(firePower);
     }
@@ -101,8 +108,11 @@ public class Main extends AdvancedRobot
         double futureX = enemy.getFutureX(time);
         double futureY = enemy.getFutureY(time);
         double absDeg = absoluteBearing(getX(), getY(), futureX, futureY);
-        // turn the gun to the predicted x,y location
-        setTurnGunRight(normalizeBearing(absDeg - getGunHeading()));
+        // turn the gun to the predicted x,y location and print data
+        double predictedTurn = normalizeBearing(absDeg - getGunHeading());
+        ps.println("Tracking: " + enemy.getName() + "; "  + "(x, y) "  + " (" + f.format(enemy.getX()) + ", " + f.format(enemy.getY()));
+        ps.println("    (predicted x, predicted y) " + "(" + f.format(futureX) + ", " + f.format(futureY) + ")" + "; " + "Turning Gun To: " + f.format(predictedTurn));
+        setTurnGunRight(predictedTurn);
     }
 
     public double absoluteBearing(double x1, double y1, double x2, double y2) {
