@@ -48,14 +48,18 @@ public class Eye extends AdvancedRobot
      * isBulletFired: Check if bullet is fired.
      * Returns: True if bullet fired, False if not.
      */
-    public boolean isBulletFired(AdvancedEnemyBot scanEvent) {
-        double prevEnergy = currentEnergy; // this basically doesn't work, you need to track individual robots.
-        currentEnergy = scanEvent.getEnergy();
-        double scanDifference = prevEnergy - currentEnergy;
-        if((prevEnergy > currentEnergy) && (scanDifference <= 3.0)) {
-                return true;
+    public boolean isBulletFired(ScannedRobotEvent event) {
+        if(enemy.getName().equals(event.getName())) {
+            double prevEnergy = currentEnergy; 
+            currentEnergy = enemy.getEnergy();
+            double scanDifference = prevEnergy - currentEnergy;
+            if((prevEnergy > currentEnergy) && (scanDifference <= 3.0)) {
+                    return true;
+            } else {
+                    return false;
+            }
         } else {
-                return false;
+            return false;
         }
     }
 	/**
@@ -69,15 +73,17 @@ public class Eye extends AdvancedRobot
 		// Robot main loop
 		while(true) {
 			setTurnRadarRight(360);
-                        if (!usePredict) {
-                            double turnTo = enemy.getBearing() + getHeading() - getGunHeading();
-                            turnTo = (turnTo > 180) ? -1 * (360 - turnTo) : turnTo;
-		            setTurnGunRight(turnTo);
-                        }
-                        else {
-                            predictTurnGun(calcTime(enemy));
-                        }
-		        checkFire(3.0);
+            if (!usePredict) {
+                if(enemy.getDistance() <= 40) {
+                    double turnTo = enemy.getBearing() + getHeading() - getGunHeading();
+                    turnTo = (turnTo > 180) ? -1 * (360 - turnTo) : turnTo;
+                } else {
+                    setTurnGunRight(normalizeBearing(enemy.getBearing() + getHeading() - getGunHeading()));
+                }
+            } else {
+                predictTurnGun(calcTime(enemy));
+            }
+		    checkFire(3.0);
 			execute();
 		}
 	}
@@ -91,8 +97,12 @@ public class Eye extends AdvancedRobot
         if (enemy.none() || e.getName().equals(enemy.getName()) || e.getDistance() < enemy.getDistance() - 50 || e.getName().equals(hitBy)) {
                 enemy.update(e, this);
         }
-        if (isBulletFired(enemy)) {
-            dodgeBullet(enemy);
+        if (isBulletFired(e)) {
+            dodgeBullet(enemy); //enemy is unnecessary logically, but i like dodging enemy bullets :>
+        } else {
+            if(e.getDistance() <= 40) {
+                back(50); // don't care where. just gtfo.
+            }
         }
 		//if (target != currentScanned) {
                 //        execute();
