@@ -55,11 +55,11 @@ public class Main extends AdvancedRobot
         if (event.getName().equals(enemy.getName())) {
             enemy.reset();
         }
-        if(ps != null) ps.close();
+        if (ps != null) ps.close();
     }
 
     public void onWin(WinEvent event) {
-        if(ps != null) ps.close();
+        if (ps != null) ps.close();
     }
 
 	/**
